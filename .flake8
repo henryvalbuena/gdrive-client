@@ -1,0 +1,7 @@
+[flake8]
+exclude = 
+    .vscode,
+    __pycache__,
+    gdrive_test,
+    gdrive_venv,
+    .git
