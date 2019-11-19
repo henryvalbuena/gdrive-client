@@ -1,10 +1,17 @@
+"""Start program."""
+
 from __future__ import print_function
-import pickle
+
 import os.path
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
+import pickle
+
 from google.auth.transport.requests import Request
+
+from google_auth_oauthlib.flow import InstalledAppFlow
+
+from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
+
 
 # If modifying these scopes, delete the file token.pickle.
 SCOPES = [
@@ -16,6 +23,7 @@ DEBUG = True
 
 
 def authenticate():
+    """Authenticate the transaction."""
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -39,11 +47,14 @@ def authenticate():
 
 
 def list_files(service):
-    """Shows basic usage of the Drive v3 API.
+    """Show basic usage of the Drive v3 API.
+
     Prints the names and ids of the first 10 files the user has access to.
 
-    Args
-    service: Authenticated service token, call authenticate for this parameter
+    Args:
+        service: Authenticated service token, call authenticate for this
+        parameter
+
     """
     # Call the Drive v3 API
     results = service.files().list(
@@ -62,6 +73,15 @@ def list_files(service):
 
 
 def upload_file(service):
+    """Upload a file to gdrive.
+
+    Uploads a file to gdrive based on the service passed.
+
+    Args:
+        service: Authenticated service token, call authenticate for this
+        parameter
+
+    """
     if DEBUG is not True:
         file_metadata = {'name': 'file1.txt'}
         media = MediaFileUpload('gdrive_test/file1.txt')
@@ -72,11 +92,15 @@ def upload_file(service):
 
 
 def multi_upload(file_list, service):
-    """Prints the file IDs of the files uploaded
+    """Print the file IDs of the files uploaded.
 
-    Args
-    files: list of files to be uploaded
-    services: Authenticated service token, call authenticate for this parameter
+    Upload multiple files from the list to the service.
+
+    Args:
+        files: list of files to be uploaded
+        services: Authenticated service token, call authenticate for this
+        parameter
+
     """
     if DEBUG is not True:
         for f in file_list:
@@ -88,6 +112,7 @@ def multi_upload(file_list, service):
 
 
 def main():
+    """Entry method from the program."""
     # Create service
     service = build('drive', 'v3', credentials=authenticate())
     print('Service created')
