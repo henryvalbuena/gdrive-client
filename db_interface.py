@@ -3,9 +3,8 @@
 from models import Base, FileSchema
 
 from sqlalchemy import create_engine
-from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import sessionmaker
-
+from sqlalchemy.orm.exc import NoResultFound
 
 # For testing
 DEBUG = False
@@ -41,11 +40,6 @@ class LogFiles:
         self.engine = create_engine(f'sqlite:///{db}', echo=False)
         self.Session = sessionmaker(bind=self.engine)
         self.session = self.Session()
-        # self.Base = Base.metadata.create_all(self.engine)
-        # if self.Base is None:
-        #     self.Base = Base
-        #     self.Base.metadata.bind = self.engine
-        # self.Base = None
 
     def create_table(self, model):
         """Create the specified table.
@@ -72,10 +66,14 @@ class LogFiles:
         Args:
             model: model name of the schema/table as a string
 
+        Returns:
+            True if the table was found and dropped, else False
+
         """
         for table in self.Base.metadata.sorted_tables:
             if str(table) == model:
-                table.drop(checkfirst=True)
+                # table.drop(checkfirst=True)
+                table.drop()
                 return True
                 if DEBUG:
                     print(f'Table {str(model)} has been dropped')
@@ -91,18 +89,15 @@ class LogFiles:
             filename: file name
             filesize: file size in bytes
 
+        Raises:
+            IntegrityError, OperationalError
+
         """
-        try:
-            self.session.add(
-                self.model(fileid=fileid, filename=filename, filesize=filesize)
-            )
-            self.session.commit()
-        except IntegrityError:
-            print('Duplicate values')
-        except OperationalError:
-            print('Db has no tables')
-        finally:
-            self.session.close()
+        self.session.add(
+            self.model(fileid=fileid, filename=filename, filesize=filesize)
+        )
+        self.session.commit()
+        self.session.close()
 
     def create_files(self, file_list):
         """Create multiple file objects in the database.
@@ -113,24 +108,21 @@ class LogFiles:
         Args:
             file_list: list of file objects
 
+        Raises:
+            IntegrityError, OperationalError
+
         """
-        try:
-            self.session.add_all(
-                [
-                    self.model(
-                        fileid=fl['fileid'],
-                        filename=fl['filename'],
-                        filesize=fl['filesize'])
-                    for fl in file_list
-                ]
-            )
-            self.session.commit()
-        except IntegrityError:
-            print('Duplicate values')
-        except OperationalError:
-            print('Db has no tables')
-        finally:
-            self.session.close()
+        self.session.add_all(
+            [
+                self.model(
+                    fileid=fl['fileid'],
+                    filename=fl['filename'],
+                    filesize=fl['filesize'])
+                for fl in file_list
+            ]
+        )
+        self.session.commit()
+        self.session.close()
 
     def get_file_by_id(self, fileid):
         """Get file by id.
@@ -140,34 +132,31 @@ class LogFiles:
         Args:
             fileid: gdrive file id
 
+        Raises:
+            NoResultFound, OperationalError
+
         """
-        f = None
-        try:
-            f = self.session.query(self.model).filter_by(
-                    fileid=fileid
-                ).one()
-            if DEBUG:
-                print(f'name: {f.filename} id: {f.fileid} size: {f.filesize}')
-        except OperationalError:
-            print('Db has no tables')
-        finally:
-            self.session.close()
-            return f
+        f = self.session.query(self.model).filter_by(
+                fileid=fileid
+            ).one()
+        if DEBUG:
+            print(f'name: {f.filename} id: {f.fileid} size: {f.filesize}')
+        self.session.close()
+        return f
 
     def get_files(self):
         """Get all the files in the database.
 
-        Returns a list of object files from the database.
+        Returns a list of object files from the database, if found, else an
+        empty list.
+
+        Raises:
+            OperationalError
 
         """
-        files = list()
-        try:
-            files = self.session.query(self.model).all()
-        except OperationalError:
-            print('Db has no tables')
-        finally:
-            self.session.close()
-            return files
+        f = self.session.query(self.model).all()
+        self.session.close()
+        return f
 
     def remove_file_by_id(self, fileid):
         """Remove a file by the id.
@@ -178,14 +167,51 @@ class LogFiles:
         Args:
             fileid: gdrive file id
 
+        Raises:
+            OperationalError, NoResultFound
+
         """
         file = self.get_file_by_id(fileid)
         self.session.delete(file)
         self.session.commit()
+        self.session.close()
+
+    def update_file(self, curfileid, fileid, filename, filesize):
+        """Update an existing file.
+
+        Updates a file based on the file id if found.
+
+        Args:
+            fileid: gdrive file id
+            filename: file name
+            filesize: file size in bytes
+
+        Raises:
+            OperationError, NoResultFound
+
+        """
+        f = self.session.query(FileSchema).filter(
+                self.model.fileid == curfileid
+            )
+        f.update(
+            {
+                'fileid': fileid,
+                'filename': filename,
+                'filesize': filesize
+            }
+        )
+        try:
+            f.one().fileid
+            self.session.commit()
+        except AttributeError:
+            self.session.rollback()
+            raise NoResultFound
+        finally:
+            self.session.close()
 
 
 if DEBUG:
-    lf = LogFiles(DB)
+    lf = LogFiles(DB, FileSchema)
     lf.create_table(FileSchema)
     lf.create_files(
         [

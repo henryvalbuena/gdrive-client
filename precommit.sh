@@ -20,7 +20,7 @@ flake() {
     then
         echo $'\n* * * W A R N I N G * * *\n'
         echo $'Check flake8 errors before committing to branch\n'
-        return "$?"
+        return 1
     fi
 }
 
