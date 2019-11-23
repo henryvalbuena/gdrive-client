@@ -5,4 +5,7 @@ exclude =
     gdrive_test,
     gdrive_venv,
     .git,
-    inter.py
+    inter.py,
+    setup.py,
+    gdrive.egg-info,
+    __init__.py

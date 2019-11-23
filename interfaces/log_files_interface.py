@@ -1,14 +1,14 @@
 """Database interface module."""
 
-from models import Base, FileSchema
+from models.file_schema import Base, FileSchema
 
 from sqlalchemy import create_engine
+from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.exc import NoResultFound
 
 # For testing
 DEBUG = False
-DB = 'fileids.db'
 
 
 class LogFiles:
@@ -93,11 +93,19 @@ class LogFiles:
             IntegrityError, OperationalError
 
         """
-        self.session.add(
-            self.model(fileid=fileid, filename=filename, filesize=filesize)
-        )
-        self.session.commit()
-        self.session.close()
+        try:
+            self.session.add(
+                self.model(fileid=fileid, filename=filename, filesize=filesize)
+            )
+            self.session.commit()
+        except OperationalError:
+            self.session.rollback()
+            raise
+        except IntegrityError:
+            self.session.rollback()
+            raise
+        finally:
+            self.session.close()
 
     def create_files(self, file_list):
         """Create multiple file objects in the database.
@@ -112,17 +120,25 @@ class LogFiles:
             IntegrityError, OperationalError
 
         """
-        self.session.add_all(
-            [
-                self.model(
-                    fileid=fl['fileid'],
-                    filename=fl['filename'],
-                    filesize=fl['filesize'])
-                for fl in file_list
-            ]
-        )
-        self.session.commit()
-        self.session.close()
+        try:
+            self.session.add_all(
+                [
+                    self.model(
+                        fileid=fl['fileid'],
+                        filename=fl['filename'],
+                        filesize=fl['filesize'])
+                    for fl in file_list
+                ]
+            )
+            self.session.commit()
+        except OperationalError:
+            self.session.rollback()
+            raise
+        except IntegrityError:
+            self.session.rollback()
+            raise
+        finally:
+            self.session.close()
 
     def get_file_by_id(self, fileid):
         """Get file by id.
@@ -135,14 +151,21 @@ class LogFiles:
         Raises:
             NoResultFound, OperationalError
 
+        Returns:
+            File object in FileSchema namespace.
+
         """
-        f = self.session.query(self.model).filter_by(
-                fileid=fileid
-            ).one()
-        if DEBUG:
-            print(f'name: {f.filename} id: {f.fileid} size: {f.filesize}')
-        self.session.close()
-        return f
+        try:
+            f = self.session.query(self.model).filter_by(
+                    fileid=fileid
+                ).one()
+            return f
+        except OperationalError:
+            raise
+        except NoResultFound:
+            raise
+        finally:
+            self.session.close()
 
     def get_files(self):
         """Get all the files in the database.
@@ -153,10 +176,17 @@ class LogFiles:
         Raises:
             OperationalError
 
+        Returns:
+            List of files if there's any, otherwise an empty list.
+
         """
-        f = self.session.query(self.model).all()
-        self.session.close()
-        return f
+        try:
+            f = self.session.query(self.model).all()
+            return f
+        except OperationalError:
+            raise
+        finally:
+            self.session.close()
 
     def remove_file_by_id(self, fileid):
         """Remove a file by the id.
@@ -171,10 +201,18 @@ class LogFiles:
             OperationalError, NoResultFound
 
         """
-        file = self.get_file_by_id(fileid)
-        self.session.delete(file)
-        self.session.commit()
-        self.session.close()
+        try:
+            file = self.get_file_by_id(fileid)
+            self.session.delete(file)
+            self.session.commit()
+        except OperationalError:
+            self.session.rollback()
+            raise
+        except NoResultFound:
+            self.session.rollback()
+            raise
+        finally:
+            self.session.close()
 
     def update_file(self, curfileid, fileid, filename, filesize):
         """Update an existing file.
@@ -190,27 +228,31 @@ class LogFiles:
             OperationError, NoResultFound
 
         """
-        f = self.session.query(FileSchema).filter(
-                self.model.fileid == curfileid
-            )
-        f.update(
-            {
-                'fileid': fileid,
-                'filename': filename,
-                'filesize': filesize
-            }
-        )
         try:
+            f = self.session.query(FileSchema).filter(
+                    self.model.fileid == curfileid
+                )
+            f.update(
+                {
+                    'fileid': fileid,
+                    'filename': filename,
+                    'filesize': filesize
+                }
+            )
             f.one().fileid
             self.session.commit()
-        except AttributeError:
+        except OperationalError:
             self.session.rollback()
-            raise NoResultFound
+            raise
+        except NoResultFound:
+            self.session.rollback()
+            raise
         finally:
             self.session.close()
 
 
 if DEBUG:
+    DB = 'db/fileids.db'
     lf = LogFiles(DB, FileSchema)
     lf.create_table(FileSchema)
     lf.create_files(
@@ -240,8 +282,3 @@ if DEBUG:
     files = lf.get_files()
     for file in files:
         print(file.fileid, file.filename)
-    # print(lf.get_file_by_id('21'))
-    # lf.remove_file_by_id('21')
-    # print(lf.get_file_by_id('21'))
-    # print(f'name: {lf.get_file_by_id("3").filename}')
-    # lf.drop(None)

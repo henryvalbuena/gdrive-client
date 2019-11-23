@@ -1,6 +1,5 @@
 # GDrive Credentials and Tokens
-credentials.json
-*.pickle
+secrets
 
 # DBs
 *.db

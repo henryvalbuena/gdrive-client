@@ -1,11 +1,22 @@
 # To Do GDrive Python Client
 
-- Implement update_file with tests
+## In progress
 - Multi file upload
 - Log the file ids uploaded
 - Check how to create/upload a folder
 - Update cloud folder with only new files/changes
-- Read local files and compare with remote files
+- File backup triggers
+- Watch file changes
+- Handle backup times
 
 
-- Get SQLite3 working -> DONE
+## Done
+- Get SQLite3 working
+- Implement update_file with tests
+
+
+# Refactor
+
+## Test suit
+- Separate responsibilities
+- Mock tests

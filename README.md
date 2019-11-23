@@ -2,23 +2,56 @@
 Client application to sync/backup files to Google Drive cloud storage
 
 ## Initial idea
-- Create a Python program that will be executed on a Linux platform
-- The program will automatically sync the file changes with the cloud storage
-- It will log the operations
+- File backups
+- Scheduled backups or automatic triggers
+- Operation logging
 
 ## On the works
 - Study the Google Drive API
-- Proof of Concept
+- Indexing local files
+- File changes/backup triggers
 
 ## Requirements
 
 - Run `pip3 install -r requirements.txt`
 - Go to [Enable API](https://console.developers.google.com/apis) and select Google Drive API from the list
 - Create a New Project and create the credentials
-- Save the *credentials.json* file in the same directory the program will be located
+- Save the *credentials.json* file in secrets/credentials/
+- An authentication token will be created with the necessary information in secrets/token/
 
 > The *credentials.json* is required to authenticate the application
 
+## Project Structure
+```
+├── LICENSE
+├── README.md
+├── ToDo.md
+├── app
+│   └── __init__.py
+├── db
+│   └── fileids.db
+├── gdrive_test
+│   ├── file1.txt
+│   └── file2.txt
+├── interfaces
+│   ├── __init__.py
+│   └── log_files_interface.py
+├── models
+│   ├── __init__.py
+│   └── file_schema.py
+├── precommit.sh
+├── requirements.txt
+├── secrets
+│   ├── credentials
+│   │   └── credentials.json
+│   └── token
+│       └── token.pickle
+├── setup.py
+├── start.py
+└── tests
+    ├── __init__.py
+    └── test_unit.py
+```
 ## Commands
 
 Run `python3 start.py` to test out the program.

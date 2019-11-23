@@ -1,10 +1,11 @@
 """Test unit module."""
 
+import os
 from unittest import TestCase
 
-from db_interface import LogFiles
+from interfaces.log_files_interface import LogFiles
 
-from models import FileSchema
+from models.file_schema import FileSchema
 
 from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.orm.exc import NoResultFound
@@ -13,7 +14,7 @@ from sqlalchemy.orm.exc import NoResultFound
 class TestDB(TestCase):
     """Testing Database."""
 
-    DB = 'testing.db'
+    DB = 'db/testing.db'
     file = {
         'fileid': '80',
         'filename': 'tests80.txt',
@@ -37,9 +38,18 @@ class TestDB(TestCase):
         }
     ]
 
+    @classmethod
+    def setUpClass(cls):
+        """Set up class."""
+        cls.log_files = LogFiles(cls.DB, FileSchema)
+
+    @classmethod
+    def tearDownClass(cls):
+        """Tear down class."""
+        os.remove(cls.DB)
+
     def setUp(self):
         """Set up method."""
-        self.log_files = LogFiles(self.DB, FileSchema)
         self.log_files.create_table(FileSchema)
 
     def tearDown(self):
@@ -108,6 +118,16 @@ class TestDB(TestCase):
             'wrong'
         )
 
+    def test_get_file_with_no_table(self):
+        """Test to query a file with no table."""
+        self.log_files.drop_table(FileSchema.__tablename__)
+
+        self.assertRaises(
+            OperationalError,
+            self.log_files.get_file_by_id,
+            'wrong'
+        )
+
     def test_get_all_files(self):
         """Test to get all files."""
         fid = self.files[0]['fileid']
@@ -123,6 +143,15 @@ class TestDB(TestCase):
         files = self.log_files.get_files()
 
         self.assertEqual(len(files), 0)
+
+    def test_get_multi_files_with_no_table(self):
+        """Test to query a file with no table."""
+        self.log_files.drop_table(FileSchema.__tablename__)
+
+        self.assertRaises(
+            OperationalError,
+            self.log_files.get_files,
+        )
 
     def test_duplicated_file(self):
         """Test duplicated file."""
