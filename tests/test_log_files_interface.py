@@ -1,9 +1,9 @@
-"""Test unit module."""
+"""Test unit log files interface module."""
 
 import os
 from unittest import TestCase
 
-from interfaces.log_files_interface import LogFiles
+from interfaces.log_files import LogFiles
 
 from models.file_schema import FileSchema
 
@@ -12,7 +12,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 
 class TestDB(TestCase):
-    """Testing Database."""
+    """Testing database interface module."""
 
     DB = 'db/testing.db'
     file = {

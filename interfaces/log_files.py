@@ -21,6 +21,7 @@ class LogFiles:
         create_files: creates multiple logs in the database
         get_file_by_id: returns an object with the file metadata
         get_files: returns a list of objects with file medatada
+        update_file: updates a file based on the file id provided
         remove_file_by_id: removes a file object from the database
         drop: drops a table from the database
 
@@ -157,8 +158,8 @@ class LogFiles:
         """
         try:
             f = self.session.query(self.model).filter_by(
-                    fileid=fileid
-                ).one()
+                fileid=fileid
+            ).one()
             return f
         except OperationalError:
             raise
@@ -230,8 +231,8 @@ class LogFiles:
         """
         try:
             f = self.session.query(FileSchema).filter(
-                    self.model.fileid == curfileid
-                )
+                self.model.fileid == curfileid
+            )
             f.update(
                 {
                     'fileid': fileid,
