@@ -8,6 +8,8 @@
 - File backup triggers
 - Watch file changes
 - Handle backup times
+- Directory discovery
+- Ignore hidden files
 
 
 ## Done
