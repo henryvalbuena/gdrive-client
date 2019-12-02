@@ -9,7 +9,7 @@ commit() {
     git add -A&&git commit -m "$1"
     if [ "$?" -eq 0 ]
     then
-        echo "Done!"
+        echo $'\nPre-commit script done!'
     fi
 }
 

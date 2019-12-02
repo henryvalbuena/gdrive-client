@@ -3,7 +3,9 @@
 import os
 from unittest import TestCase
 
-from interfaces.local_files import LocalFiles
+from interfaces.local_files import get_dictionary_files, get_directories
+from interfaces.local_files import get_file_mod_date, get_file_names, \
+    get_file_size
 
 
 class TestLF(TestCase):
@@ -22,13 +24,9 @@ class TestLF(TestCase):
         """Tear down class."""
         os.rmdir(cls.temp_path)
 
-    def setUp(self):
-        """Set up method."""
-        self.lf = LocalFiles
-
     def test_get_file_list(self):
         """Test getting file list for the current directory."""
-        files = len(self.lf.get_file_names())
+        files = len(get_file_names())
 
         self.assertTrue(
             files > 0
@@ -36,7 +34,7 @@ class TestLF(TestCase):
 
     def test_get_file_list_no_files(self):
         """Test getting file list from an empty directory."""
-        files = len(self.lf.get_file_names(self.temp_path))
+        files = len(get_file_names(self.temp_path))
 
         self.assertTrue(files == 0)
 
@@ -46,14 +44,14 @@ class TestLF(TestCase):
 
         self.assertEqual(
             fdate,
-            self.lf.get_file_mod_date(self.fname)
+            get_file_mod_date(self.fname)
         )
 
     def test_get_file_date_wrong_name(self):
         """Test getting a file date with a wrong filename."""
         self.assertRaises(
             FileNotFoundError,
-            self.lf.get_file_mod_date,
+            get_file_mod_date,
             'wrong'
         )
 
@@ -63,37 +61,37 @@ class TestLF(TestCase):
 
         self.assertEqual(
             fsize,
-            self.lf.get_file_size(self.fname)
+            get_file_size(self.fname)
         )
 
     def test_get_file_size_wrong_name(self):
         """Test getting file size with a wrong filename."""
         self.assertRaises(
             FileNotFoundError,
-            self.lf.get_file_size,
+            get_file_size,
             'wrong'
         )
 
     def test_get_directories(self):
         """Test getting directories only."""
-        dirs = len(self.lf.get_directories())
+        dirs = len(get_directories())
 
         self.assertTrue(dirs > 0)
 
     def test_getting_non_existing_directories(self):
         """Test getting directories from an empty directory."""
-        dirs = len(self.lf.get_directories(self.temp_path))
+        dirs = len(get_directories(self.temp_path))
 
         self.assertTrue(dirs == 0)
 
     def test_get_files_details_dictionary(self):
         """Test getting details for all files."""
-        deets = self.lf.get_dictionary_files()
+        deets = get_dictionary_files()
 
         self.assertIn('tests', deets)
 
     def test_getting_files_details_empty_directory(self):
         """Test getting files details from an empty directory."""
-        deets = self.lf.get_dictionary_files(self.temp_path)
+        deets = get_dictionary_files(self.temp_path)
 
         self.assertNotIn('tests', deets)

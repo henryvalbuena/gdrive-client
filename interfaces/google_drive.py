@@ -17,7 +17,7 @@ from googleapiclient.http import MediaFileUpload
 SCOPES = [
     'https://www.googleapis.com/auth/drive.file',
     'https://www.googleapis.com/auth/drive.metadata.readonly',
-    ]
+]
 FILE_IDS = 'file_ids.txt'
 DEBUG = True
 
@@ -50,7 +50,6 @@ def list_files(service):
     """Show basic usage of the Drive v3 API.
 
     Prints the names and ids of the first 10 files the user has access to.
-
     Args:
         service: Authenticated service token, call authenticate for this
         parameter
@@ -76,7 +75,6 @@ def upload_file(service):
     """Upload a file to gdrive.
 
     Uploads a file to gdrive based on the service passed.
-
     Args:
         service: Authenticated service token, call authenticate for this
         parameter
@@ -95,7 +93,6 @@ def multi_upload(file_list, service):
     """Print the file IDs of the files uploaded.
 
     Upload multiple files from the list to the service.
-
     Args:
         files: list of files to be uploaded
         services: Authenticated service token, call authenticate for this
@@ -123,14 +120,14 @@ def main():
             'metadata': {
                 'name': 'file1.txt',
                 'parents': ['1VxScqKnZhPBTz_isnnBvDQfQ_I1KVh8L']
-                },
+            },
             'file_path': 'gdrive_test/file1.txt'
         },
         {
             'metadata': {
                 'name': 'file2.txt',
                 'parents': ['1VxScqKnZhPBTz_isnnBvDQfQ_I1KVh8L']
-                },
+            },
             'file_path': 'gdrive_test/file2.txt'
         },
     ]
@@ -138,7 +135,3 @@ def main():
     list_files(service)
     # Upload files
     multi_upload(file_list, service)
-
-
-if __name__ == '__main__':
-    main()

@@ -3,82 +3,78 @@
 import os
 
 
-class LocalFiles:
-    """Local file class."""
+def get_file_names(path=None):
+    """Return filename list.
 
-    @staticmethod
-    def get_file_names(path=None):
-        """Return filename list.
+    Args:
+        path: optional - provide the path to scan for files
 
-        Args:
-            path: optional - provide the path to scan for files
+    Returns:
+        List of file names from the current directory
 
-        Returns:
-            List of file names from the current directory
+    """
+    return os.listdir(path)
 
-        """
-        return os.listdir(path)
 
-    @staticmethod
-    def get_file_mod_date(filename):
-        """Return unix timestamp of the file modified time.
+def get_file_mod_date(filename):
+    """Return unix timestamp of the file modified time.
 
-        Args:
-            filename: filename to which check for the creation time
+    Args:
+        filename: filename to which check for the creation time
 
-        Returns:
-            int representing the file's date unix timestamp
+    Returns:
+        int representing the file's date unix timestamp
 
-        """
-        return os.path.getmtime(filename)
+    """
+    return os.path.getmtime(filename)
 
-    @staticmethod
-    def get_file_size(filename):
-        """Return file size in bytes.
 
-        Args:
-            filename: filename to which check for the creation time
+def get_file_size(filename):
+    """Return file size in bytes.
 
-        Returns:
-            int representing the file's size in bytes
+    Args:
+        filename: filename to which check for the creation time
 
-        """
-        return os.path.getsize(filename)
+    Returns:
+        int representing the file's size in bytes
 
-    @staticmethod
-    def get_directories(path=None):
-        """Return directories list.
+    """
+    return os.path.getsize(filename)
 
-        Args:
-            path: optional - provide the path to scan for files
 
-        Returns:
-            List of directories names, empty if no directories are found
+def get_directories(path=None):
+    """Return directories list.
 
-        """
-        return [
-            d
-            for d in os.listdir(path)
-            if '.' not in d
+    Args:
+        path: optional - provide the path to scan for files
+
+    Returns:
+        List of directories names, empty if no directories are found
+
+    """
+    return [
+        d
+        for d in os.listdir(path)
+        if '.' not in d
+    ]
+
+
+def get_dictionary_files(path=None):
+    """Get a dictionary with filenames, sizes, and last modified timestamp.
+
+    Args:
+        path: optional - provide the path to scan for files
+
+    Returns:
+        Dictionary of file's filenames, sizes, and last modified timestamp
+
+    """
+    filenames = get_file_names(path)
+    file_sizes = dict()
+
+    for fname in filenames:
+        file_sizes[fname] = [
+            get_file_size(fname),
+            get_file_mod_date(fname)
         ]
-
-    @staticmethod
-    def get_dictionary_files(path=None):
-        """Get a dictionary with filenames, sizes, and last modified timestamp.
-
-        Args:
-            path: optional - provide the path to scan for files
-
-        Returns:
-            Dictionary of file's filenames, sizes, and last modified timestamp
-
-        """
-        filenames = LocalFiles.get_file_names(path)
-        file_sizes = dict()
-
-        for fname in filenames:
-            file_sizes[fname] = [
-                    LocalFiles.get_file_size(fname),
-                    LocalFiles.get_file_mod_date(fname)
-            ]
-        return file_sizes
+    return file_sizes

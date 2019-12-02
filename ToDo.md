@@ -8,13 +8,13 @@
 - File backup triggers
 - Watch file changes
 - Handle backup times
-- Directory discovery
 - Ignore hidden files
 
 
 ## Done
 - Get SQLite3 working
 - Implement update_file with tests
+- Directory discovery
 
 
 # Refactor

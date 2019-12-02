@@ -59,6 +59,7 @@ Run `python3 start.py` to test out the program.
 ## Sources
 - Google Drive API [Examples](https://developers.google.com/drive/api/v3/manage-uploads) and [Documentation](https://developers.google.com/drive/api/v3/reference/files/create)
 - Python client [Github Docs](https://github.com/googleapis/google-api-python-client/tree/master/docs)
+- Mime types [IANA](https://www.iana.org/assignments/media-types/media-types.xhtml) and [Google Drive](https://developers.google.com/drive/api/v3/mime-types)
 
 
 ## License
