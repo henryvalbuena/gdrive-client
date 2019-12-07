@@ -6,7 +6,11 @@
 
 # Commit function
 commit() {
-    git add -A&&git commit -m "$1"
+    if [ "$1" == "-a" ]; then
+        git add -A&&git commit --amend
+    else
+        git add -A&&git commit -m "$1"
+    fi
     if [ "$?" -eq 0 ]
     then
         echo $'\nPre-commit script done!'

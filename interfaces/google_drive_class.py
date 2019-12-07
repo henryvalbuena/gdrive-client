@@ -10,7 +10,9 @@ from google.auth.transport.requests import Request
 from google_auth_oauthlib.flow import InstalledAppFlow
 
 from googleapiclient.discovery import build
-# from googleapiclient.http import MediaFileUpload
+from googleapiclient.http import MediaFileUpload
+
+DEBUG = False
 
 
 class GDRIVE:
@@ -55,21 +57,23 @@ class GDRIVE:
 
         """
         results = self._service.files().list(
-            pageSize=10, fields="nextPageToken, files(id, name, size, mimeType, parents)").execute()
+            # pageSize=10, fields="nextPageToken, files(id, name, size, mimeType, parents)").execute()
+            fields='files(id,name,size,mimeType,parents)').execute()
         items = results.get('files', [])
 
         if not items:
             print('No files found.')
             return list()
         else:
-            print('Files:')
-            for item in items:
-                print(u'{0} ({1}) {2}'.format(
-                    item['name'],
-                    item['id'],
-                    item['size'] if 'size' in item else 'None'),
-                    item['mimeType'],
-                    item['parents'])
+            if DEBUG:
+                print('Files:')
+                for item in items:
+                    print(u'{0} ({1}) {2}'.format(
+                        item['name'],
+                        item['id'],
+                        item['size'] if 'size' in item else 'None'),
+                        item['mimeType'],
+                        item['parents'])
             return items
 
     def create_new_folder(self, filename, parents=[]):
@@ -120,29 +124,53 @@ class GDRIVE:
         """
         self._service.files().delete(fileId=fileId).execute()
 
+    def update_file(self, file_descriptor):
+        """Update an existing file in Google Drive.
 
-# TESTING
-gd = GDRIVE()
+        Args:
+            file_descriptor: contains file metadata to be updated
 
-gd.list_drive_files()
+            Example:
+                file_descriptor = {
+                    'fileId': 'id',
+                    'media': 'file_path'
+                }
 
-# print('\nCreating directory')
-# dir2 = gd.create_new_folder(filename='dir2', parents=['15Yca5J2LY0_7YIa9ub6lwZmhcBvPdkXi'])
-# print('Creating another directory\n')
-# dir3 = gd.create_new_folder(filename='dir3', parents=[dir2['id']])
-# print('Creating another directory\n')
-# dir4 = gd.create_new_folder(filename='dir4', parents=[dir3['id']])
-# print('Creating a new file id dir4')
-# gd.create_new_file(filename='f4.txt', parents=[dir4['id']])
+        """
+        return self._service.files().update(
+            fileId=file_descriptor['fileId'],
+            body={
+                'fileId': file_descriptor['fileId'],
+                'name': file_descriptor['name']
+            },
+            media_body=MediaFileUpload(file_descriptor['media']),
+            fields='id,name,parents'
+        ).execute()
 
-# print('DELETING FILES')
-# files = [
-#     '1vt5tbUMWOXB57DRfZj_bVNlC7mzfUnio',
-#     '1ZbgqK5SjG_f39elvQZ11Pi8Z6ONM-0aO',
-#     '1eoq2CYHeFY9vURWZF1a6rPdy7Mn-xJNr'
-# ]
-# for fid in files:
-#     gd.delete_file(fileId=fid)
-# print('FILES DELETED')
 
-# gd.list_drive_files()
+if DEBUG:
+    # TESTING
+    gd = GDRIVE()
+
+    gd.list_drive_files()
+
+    # print('\nCreating directory')
+    # dir2 = gd.create_new_folder(filename='dir2', parents=['15Yca5J2LY0_7YIa9ub6lwZmhcBvPdkXi'])
+    # print('Creating another directory\n')
+    # dir3 = gd.create_new_folder(filename='dir3', parents=[dir2['id']])
+    # print('Creating another directory\n')
+    # dir4 = gd.create_new_folder(filename='dir4', parents=[dir3['id']])
+    # print('Creating a new file id dir4')
+    # gd.create_new_file(filename='f4.txt', parents=[dir4['id']])
+
+    print('DELETING FILES')
+    files = [
+        '1uV-1gu7azs4oYhqjXGAA-eZcuObEZSAv',
+        '1ZN-hqhq7nX0ZEfcSzp0vXRSVEFNeUQAX',
+        '1fv3nE1vp7rsuw95pNwlDVgi_Qu-9owfk'
+    ]
+    for fid in files:
+        gd.delete_file(fileId=fid)
+    print('FILES DELETED')
+
+    gd.list_drive_files()
