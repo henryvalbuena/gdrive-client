@@ -71,10 +71,16 @@ def get_dictionary_files(path=None):
     """
     filenames = get_file_names(path)
     file_sizes = dict()
-
-    for fname in filenames:
-        file_sizes[fname] = [
-            get_file_size(fname),
-            get_file_mod_date(fname)
-        ]
+    if path:
+        for fname in filenames:
+            file_sizes[fname] = [
+                get_file_size(f'{path}/{fname}'),
+                get_file_mod_date(f'{path}/{fname}')
+            ]
+    else:
+        for fname in filenames:
+            file_sizes[fname] = [
+                get_file_size(fname),
+                get_file_mod_date(fname)
+            ]
     return file_sizes

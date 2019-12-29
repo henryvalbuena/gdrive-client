@@ -9,6 +9,8 @@
 - Watch file changes
 - Handle backup times
 - Ignore hidden files
+- Rename log_file for something more descriptive related with database logging
+- Review lines 55 and 56 from interfaces/log_files.py
 
 
 ## Done
